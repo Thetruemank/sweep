@@ -15,7 +15,7 @@
 <a href="https://discord.gg/sweep">
     <img src="https://dcbadge.vercel.app/api/server/sweep?style=flat" />
 </a>
-<a href="https://github.com/sweepai/sweep">
+<a href="https://github.com/sweepai/sweep.git">
     <img src="https://img.shields.io/github/stars/sweepai/sweep" />
 </a>
 <a href="https://twitter.com/sweep__ai">
@@ -66,13 +66,24 @@ Install Sweep by adding the [**Sweep GitHub App**](https://github.com/apps/sweep
 
 * For more details, visit our [Installation](docs/installation.md) page.
 
+## Windows Installation
+
+To install Sweep on Windows, you need to create an executable using the windows_installer.py script. Follow the steps below:
+
+1. Ensure you have Python installed on your system.
+2. Navigate to the directory containing the windows_installer.py script.
+3. Run the script using the command `python windows_installer.py`. This will create an executable file in the same directory.
+4. Run the created executable to install Sweep on your Windows system.
+
+Note: You might need to run the script and the executable as an administrator depending on your system's permissions.
+
 * Note: Sweep only considers issues with the "Sweep:" title on creation and not on update. If you want Sweep to pick up an issue after it has been created, you can add the "Sweep" label to the issue.
 
 * We support all languages GPT-4 supports, including Python, JS/TS, Rust, Go, Java, C# and C++.
 
 ## Limitations of Sweep
 
-* **Large-scale refactors**: >3 files or >150 lines of code changes (we're working on this!)
+Large-scale refactors: More than 3 files or more than 150 lines of code changes (we're working on this!)
     * e.g. Refactor the entire codebase from TensorFlow to PyTorch
 
 * **Editing images** and other non-text assets
