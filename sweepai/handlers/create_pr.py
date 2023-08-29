@@ -1,6 +1,5 @@
 from typing import Generator
 
-import modal
 import openai
 from github.Repository import Repository
 from loguru import logger
@@ -18,6 +17,7 @@ from sweepai.config.server import (
     ENV,
     GITHUB_DEFAULT_CONFIG,
     GITHUB_LABEL_NAME,
+    MONGODB_URI,
     OPENAI_API_KEY,
     DB_MODAL_INST_NAME,
     GITHUB_BOT_USERNAME,
@@ -27,8 +27,6 @@ from sweepai.core.sweep_bot import SweepBot
 from sweepai.utils.event_logger import posthog
 
 openai.api_key = OPENAI_API_KEY
-
-update_index = modal.Function.lookup(DB_MODAL_INST_NAME, "update_index")
 
 num_of_snippets_to_query = 10
 max_num_of_snippets = 5
@@ -69,6 +67,8 @@ def create_pr_changes(
                 "issue_url": "",
             }
         )
+        if MONGODB_URI
+        else None
     )
     sweep_bot.chat_logger = chat_logger
     organization, repo_name = sweep_bot.repo.full_name.split("/")

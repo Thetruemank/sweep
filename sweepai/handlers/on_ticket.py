@@ -7,7 +7,6 @@ On Github ticket, get ChatGPT to deal with it
 import math
 import re
 import traceback
-import modal
 import openai
 
 from github import GithubException
@@ -29,7 +28,8 @@ from sweepai.core.external_searcher import ExternalSearcher
 from sweepai.core.slow_mode_expand import SlowModeBot
 from sweepai.core.sweep_bot import SweepBot
 from sweepai.core.prompts import issue_comment_prompt
-from sandbox.sandbox_utils import Sandbox
+
+# from sandbox.sandbox_utils import Sandbox
 from sweepai.handlers.create_pr import (
     create_pr_changes,
     create_config_pr,
@@ -45,7 +45,7 @@ from sweepai.config.client import (
 )
 from sweepai.config.server import (
     ENV,
-    DB_MODAL_INST_NAME,
+    MONGODB_URI,
     OPENAI_API_KEY,
     GITHUB_BOT_USERNAME,
     GITHUB_LABEL_NAME,
@@ -56,13 +56,11 @@ from sweepai.utils.github_utils import (
     get_github_client,
     get_num_files_from_repo,
     get_token,
-    search_snippets,
 )
 from sweepai.utils.prompt_constructor import HumanMessagePrompt
+from sweepai.utils.search_utils import search_snippets
 
 openai.api_key = OPENAI_API_KEY
-
-update_index = modal.Function.lookup(DB_MODAL_INST_NAME, "update_index")
 
 sep = "\n---\n"
 bot_suffix_starring = (
@@ -206,34 +204,43 @@ async def on_ticket(
     if assignee is None:
         assignee = current_issue.user.login
 
-    chat_logger = ChatLogger(
-        {
-            "repo_name": repo_name,
-            "title": title,
-            "summary": summary,
-            "issue_number": issue_number,
-            "issue_url": issue_url,
-            "username": username if not username.startswith("sweep") else assignee,
-            "repo_full_name": repo_full_name,
-            "repo_description": repo_description,
-            "installation_id": installation_id,
-            "type": "ticket",
-            "mode": ENV,
-            "comment_id": comment_id,
-            "edited": edited,
-        }
+    chat_logger = (
+        ChatLogger(
+            {
+                "repo_name": repo_name,
+                "title": title,
+                "summary": summary,
+                "issue_number": issue_number,
+                "issue_url": issue_url,
+                "username": username if not username.startswith("sweep") else assignee,
+                "repo_full_name": repo_full_name,
+                "repo_description": repo_description,
+                "installation_id": installation_id,
+                "type": "ticket",
+                "mode": ENV,
+                "comment_id": comment_id,
+                "edited": edited,
+            }
+        )
+        if MONGODB_URI
+        else None
     )
 
-    is_paying_user = chat_logger.is_paying_user()
-    is_trial_user = chat_logger.is_trial_user()
-    use_faster_model = chat_logger.use_faster_model(g)
+    if chat_logger:
+        is_paying_user = chat_logger.is_paying_user()
+        is_trial_user = chat_logger.is_trial_user()
+        use_faster_model = chat_logger.use_faster_model(g)
+    else:
+        is_paying_user = True
+        is_trial_user = False
+        use_faster_model = False
 
     if fast_mode:
         use_faster_model = True
 
     sweep_context = SweepContext(issue_url=issue_url, use_faster_model=use_faster_model)
 
-    if not comment_id and not edited:
+    if not comment_id and not edited and chat_logger:
         chat_logger.add_successful_ticket(
             gpt3=use_faster_model
         )  # moving higher, will increment the issue regardless of whether it's a success or not
@@ -320,9 +327,15 @@ async def on_ticket(
         tickets_allocated = 15
     if is_paying_user:
         tickets_allocated = 500
-    ticket_count = max(tickets_allocated - chat_logger.get_ticket_count(), 0)
+    ticket_count = (
+        max(tickets_allocated - chat_logger.get_ticket_count(), 0)
+        if chat_logger
+        else 999
+    )
     daily_ticket_count = (
-        2 - chat_logger.get_ticket_count(use_date=True) if not use_faster_model else 0
+        (2 - chat_logger.get_ticket_count(use_date=True) if not use_faster_model else 0)
+        if chat_logger
+        else 999
     )
 
     model_name = "GPT-3.5" if use_faster_model else "GPT-4"
@@ -554,7 +567,8 @@ async def on_ticket(
     }
     token = get_token(installation_id)
     repo_url = f"https://x-access-token:{token}@github.com/{repo_name}.git"
-    sandbox = Sandbox.from_token(repo, repo_url, sandbox_config)
+    # sandbox = Sandbox.from_token(repo, repo_url, sandbox_config)
+    sandbox = None
 
     logger.info("Fetching relevant files...")
     try:
@@ -1006,7 +1020,7 @@ async def on_ticket(
             # Todo(lukejagg): Execute sandbox after each iteration
             lint_output = None
             review_message += (
-                f"Here is the {ordinal(i + 1)} review\n> "
+                f"Here is the {ordinal(1)} review\n> "
                 + review_comment.replace("\n", "\n> ")
                 + "\n\n"
             )

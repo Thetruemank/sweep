@@ -23,6 +23,14 @@
 </a>
 </p>
 
+<p align="center">
+    <a href="https://cloud.digitalocean.com/apps/new?repo=https://github.com/sweepai/sweep/tree/main">
+        <img src="https://www.deploytodo.com/do-btn-white-ghost.svg" alt="Deploy to DO">
+    </a>
+<p>
+
+*🎉 We recently changed our license to the Elastic License V2 to allow Sweep for commercial usage.*
+
 <b>Sweep</b> is an AI junior developer that transforms bug reports & feature requests into code changes.
 
 Describe bugs, small features, and refactors like you would to a junior developer, and Sweep:
@@ -81,6 +89,10 @@ Note: You might need to run the script and the executable as an administrator de
 
 * We support all languages GPT-4 supports, including Python, JS/TS, Rust, Go, Java, C# and C++.
 
+## Self-hosting
+
+You can self-host Sweep with the Docker image (`ghcr.io/sweepai/sweep`). The setup instructions are at [Deployment](https://docs.sweep.dev/usage/deployment).
+
 ## Limitations of Sweep
 
 Large-scale refactors: More than 3 files or more than 150 lines of code changes (we're working on this!)
@@ -116,9 +128,6 @@ For professionals who want more tickets and priority support/feature requests, c
 
 ## Roadmap
 We plan on rapidly improving Sweep. To see what we're working on, check out our [Roadmap](https://docs.sweep.dev/roadmap).
-
-## Self-hosting 
-Bare-metal self-hosting is currently not available due to tight integration with Modal infrastructure. However, if you want to deploy a private instance of Sweep for testing or development purposes, check out our [Modal Deployment](https://docs.sweep.dev/usage/deployment) page.
 
 ---
 
